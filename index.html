@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indie Music Looping System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .upload-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .upload-label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+      }
+
+      input[type="file"] {
+        position: absolute;
+        left: -9999px;
+      }
+
+      .file-input-label {
+        display: block;
+        padding: 12px 20px;
+        background: #667eea;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.3s;
+        font-weight: 500;
+      }
+
+      .file-input-label:hover {
+        background: #5568d3;
+      }
+
+      .file-input-label.drag-over {
+        background: #764ba2;
+        transform: scale(1.02);
+      }
+
+      .playlist-section {
+        margin-bottom: 20px;
+      }
+
+      .playlist-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .playlist-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 16px;
+      }
+
+      .clear-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.3s;
+      }
+
+      .clear-btn:hover {
+        background: #ff5252;
+      }
+
+      .playlist {
+        list-style: none;
+        max-height: 300px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .playlist li {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .playlist li:hover {
+        background: #efefef;
+      }
+
+      .playlist li.active {
+        background: #e7f3ff;
+        border-left: 4px solid #667eea;
+        padding-left: 8px;
+      }
+
+      .track-name {
+        flex: 1;
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .remove-btn {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        margin-left: 10px;
+        transition: background 0.2s;
+      }
+
+      .remove-btn:hover {
+        background: #ff5252;
+      }
+
+      .player-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .now-playing {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 8px;
+      }
+
+      .track-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      audio {
+        width: 100%;
+        margin-bottom: 15px;
+        border-radius: 5px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+      }
+
+      button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+        flex: 1;
+        min-width: 80px;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+      }
+
+      .btn-primary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: #764ba2;
+        color: white;
+        flex: 1;
+        min-width: 80px;
+      }
+
+      .btn-secondary:hover {
+        background: #63388c;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loop-info {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        margin-top: 15px;
+        padding: 10px;
+        background: #fff;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+      }
+
+      .loop-mode {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+      }
+
+      .empty-state-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+      }
+
+      @media (max-width: 500px) {
+        .container {
+          padding: 20px;
+        }
+
+        .controls {
+          gap: 8px;
+        }
+
+        button {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎵 Indie Music Looping</h1>
+      <p class="subtitle">Upload and loop your tracks privately</p>
+
+      <!-- Upload Section -->
+      <section class="upload-section">
+        <label class="upload-label">Add Music</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="musicInput" accept="audio/*" multiple />
+          <label for="musicInput" class="file-input-label">
+            📁 Click to upload or drag files here
+          </label>
+        </div>
+      </section>
+
+      <!-- Playlist Section -->
+      <section
+        class="playlist-section"
+        id="playlistSection"
+        style="display: none"
+      >
+        <div class="playlist-header">
+          <span class="playlist-title">Playlist</span>
+          <button class="clear-btn" onclick="clearPlaylist()">Clear All</button>
+        </div>
+        <ul class="playlist" id="playlist"></ul>
+      </section>
+
+      <!-- Player Section -->
+      <section class="player-section" id="playerSection" style="display: none">
+        <div class="now-playing">Now Playing</div>
+        <div class="track-title" id="trackTitle">No track selected</div>
+        <audio id="audioPlayer" controls>
+          Your browser does not support the audio element.
+        </audio>
+
+        <div class="controls">
+          <button
+            class="btn-primary"
+            id="playBtn"
+            onclick="playTrack()"
+            disabled
+          >
+            ▶ Play
+          </button>
+          <button
+            class="btn-primary"
+            id="pauseBtn"
+            onclick="pauseTrack()"
+            disabled
+          >
+            ⏸ Pause
+          </button>
+          <button class="btn-secondary" id="loopBtn" onclick="toggleLoopMode()">
+            🔁 Loop: Off
+          </button>
+        </div>
+
+        <div class="loop-info">
+          Loop Mode: <span class="loop-mode" id="loopModeDisplay">Off</span>
+        </div>
+      </section>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state-icon">🎧</div>
+        <p>Upload your first track to get started!</p>
+      </div>
+    </div>
+
+    <script>
+      const audioPlayer = document.getElementById("audioPlayer");
+      const musicInput = document.getElementById("musicInput");
+      const playlist = document.getElementById("playlist");
+      const trackTitle = document.getElementById("trackTitle");
+      const playlistSection = document.getElementById("playlistSection");
+      const playerSection = document.getElementById("playerSection");
+      const emptyState = document.getElementById("emptyState");
+      const playBtn = document.getElementById("playBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const loopBtn = document.getElementById("loopBtn");
+      const loopModeDisplay = document.getElementById("loopModeDisplay");
+
+      let tracks = [];
+      let currentTrackIndex = -1;
+      let loopMode = "off"; // 'off', 'one', 'all'
+
+      // Initialize on page load
+      window.addEventListener("load", () => {
+        updateUI();
+      });
+
+      // File upload handling
+      musicInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+        musicInput.value = "";
+      });
+
+      // Drag and drop
+      const fileInputLabel = document.querySelector(".file-input-label");
+      fileInputLabel.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        fileInputLabel.classList.add("drag-over");
+      });
+
+      fileInputLabel.addEventListener("dragleave", () => {
+        fileInputLabel.classList.remove("drag-over");
+      });
+
+      fileInputLabel.addEventListener("drop", (e) => {
+        e.preventDefault();
+        fileInputLabel.classList.remove("drag-over");
+        handleFiles(e.dataTransfer.files);
+      });
+
+      function handleFiles(files) {
+        for (let file of files) {
+          if (file.type.startsWith("audio/")) {
+            const track = {
+              id: Date.now() + Math.random(),
+              name: file.name.replace(/\.[^/.]+$/, ""),
+              file: file,
+              type: file.type,
+            };
+            tracks.push(track);
+            updateUI();
+          }
+        }
+      }
+
+      function updateUI() {
+        const playlistEmpty = tracks.length === 0;
+        playlistSection.style.display = playlistEmpty ? "none" : "block";
+        playerSection.style.display = playlistEmpty ? "none" : "block";
+        emptyState.style.display = playlistEmpty ? "block" : "none";
+
+        playlist.innerHTML = "";
+        tracks.forEach((track, index) => {
+          const li = document.createElement("li");
+          li.className = index === currentTrackIndex ? "active" : "";
+          li.onclick = () => selectTrack(index);
+          li.innerHTML = `
+                          <span class="track-name">${track.name}</span>
+                          <button class="remove-btn" onclick="removeTrack(${index}, event)">Remove</button>
+                      `;
+          playlist.appendChild(li);
+        });
+      }
+
+      function selectTrack(index) {
+        currentTrackIndex = index;
+        const track = tracks[index];
+        trackTitle.textContent = track.name;
+
+        const url = URL.createObjectURL(track.file);
+        audioPlayer.src = url;
+
+        updateUI();
+        playBtn.disabled = false;
+        pauseBtn.disabled = false;
+      }
+
+      function playTrack() {
+        if (currentTrackIndex >= 0) {
+          audioPlayer.play();
+        }
+      }
+
+      function pauseTrack() {
+        audioPlayer.pause();
+      }
+
+      function toggleLoopMode() {
+        const modes = ["off", "one", "all"];
+        const currentIndex = modes.indexOf(loopMode);
+        loopMode = modes[(currentIndex + 1) % modes.length];
+
+        updateLoopDisplay();
+        setupLoopBehavior();
+      }
+
+      function updateLoopDisplay() {
+        const displayText =
+          loopMode === "off"
+            ? "Off"
+            : loopMode === "one"
+              ? "One Track"
+              : "All Tracks";
+        loopModeDisplay.textContent = displayText;
+        loopBtn.textContent = `🔁 Loop: ${displayText}`;
+      }
+
+      function setupLoopBehavior() {
+        audioPlayer.onended = () => {
+          if (loopMode === "one") {
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+          } else if (loopMode === "all") {
+            if (currentTrackIndex < tracks.length - 1) {
+              selectTrack(currentTrackIndex + 1);
+              audioPlayer.play();
+            } else {
+              selectTrack(0);
+              audioPlayer.play();
+            }
+          }
+        };
+      }
+
+      function removeTrack(index, event) {
+        event.stopPropagation();
+        tracks.splice(index, 1);
+        if (currentTrackIndex === index) {
+          currentTrackIndex = -1;
+          audioPlayer.src = "";
+          trackTitle.textContent = "No track selected";
+          audioPlayer.pause();
+        } else if (currentTrackIndex > index) {
+          currentTrackIndex--;
+        }
+        updateUI();
+      }
+    </script>
+  </body>
+</html>
