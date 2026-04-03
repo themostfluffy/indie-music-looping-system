@@ -355,10 +355,19 @@
           <button class="btn-secondary" id="loopBtn" onclick="toggleLoopMode()">
             🔁 Loop: Off
           </button>
+          <button
+            class="btn-secondary"
+            id="shuffleBtn"
+            onclick="toggleShuffle()"
+          >
+            🎲 Shuffle: Off
+          </button>
         </div>
 
         <div class="loop-info">
-          Loop Mode: <span class="loop-mode" id="loopModeDisplay">Off</span>
+          Loop Mode: <span class="loop-mode" id="loopModeDisplay">Off</span
+          ><br />
+          Shuffle: <span class="loop-mode" id="shuffleModeDisplay">Off</span>
         </div>
       </section>
 
@@ -385,10 +394,14 @@
       let tracks = [];
       let currentTrackIndex = -1;
       let loopMode = "off"; // 'off', 'one', 'all'
+      let shuffleMode = false; // true/false
 
       // Initialize on page load
       window.addEventListener("load", () => {
         updateUI();
+        updateLoopDisplay();
+        updateShuffleDisplay();
+        setupLoopBehavior();
       });
 
       // File upload handling
@@ -480,6 +493,19 @@
         setupLoopBehavior();
       }
 
+      function toggleShuffle() {
+        shuffleMode = !shuffleMode;
+
+        // when shuffle is on, we treat playback as randomized sequence
+        if (shuffleMode) {
+          loopMode = "all";
+          updateLoopDisplay();
+        }
+
+        updateShuffleDisplay();
+        setupLoopBehavior();
+      }
+
       function updateLoopDisplay() {
         const displayText =
           loopMode === "off"
@@ -491,12 +517,41 @@
         loopBtn.textContent = `🔁 Loop: ${displayText}`;
       }
 
+      function updateShuffleDisplay() {
+        const displayText = shuffleMode ? "On" : "Off";
+        shuffleModeDisplay.textContent = displayText;
+        shuffleBtn.textContent = `🎲 Shuffle: ${displayText}`;
+      }
+
+      function pickRandomTrackIndex() {
+        if (tracks.length === 0) return -1;
+        if (tracks.length === 1) return 0;
+
+        let nextIndex;
+        do {
+          nextIndex = Math.floor(Math.random() * tracks.length);
+        } while (nextIndex === currentTrackIndex && tracks.length > 1);
+
+        return nextIndex;
+      }
+
       function setupLoopBehavior() {
         audioPlayer.onended = () => {
-          if (loopMode === "one") {
+          if (loopMode === "one" && !shuffleMode) {
             audioPlayer.currentTime = 0;
             audioPlayer.play();
-          } else if (loopMode === "all") {
+            return;
+          }
+
+          if (shuffleMode) {
+            if (tracks.length === 0) return;
+            const nextIndex = pickRandomTrackIndex();
+            selectTrack(nextIndex);
+            audioPlayer.play();
+            return;
+          }
+
+          if (loopMode === "all") {
             if (currentTrackIndex < tracks.length - 1) {
               selectTrack(currentTrackIndex + 1);
               audioPlayer.play();
@@ -504,6 +559,13 @@
               selectTrack(0);
               audioPlayer.play();
             }
+            return;
+          }
+
+          // off mode: advance to next track one time
+          if (currentTrackIndex < tracks.length - 1) {
+            selectTrack(currentTrackIndex + 1);
+            audioPlayer.play();
           }
         };
       }
